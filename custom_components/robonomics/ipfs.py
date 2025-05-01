@@ -66,7 +66,7 @@ async def pin_file_to_local_node_by_hash(hass: HomeAssistant, ipfs_hash: str) ->
     await ipfs_utils.remove_pin(path=f"/{IPFS_DAPP_FILE_NAME}")
     pinned = await ipfs_utils.pin_by_hash(ipfs_hash, path=f"/{IPFS_DAPP_FILE_NAME}")
     if not pinned:
-        path_for_download = await FileSystemUtils(hass).get_path_in_temp_dir(IPFS_DAPP_FILE_NAME)
+        path_for_download = FileSystemUtils(hass).get_path_in_temp_dir(IPFS_DAPP_FILE_NAME)
         await download_directory_from_ipfs(hass, ipfs_hash, path_for_download)
         await LocalGateway(hass).add(path_for_download, "/", True)
         await ipfs_utils.pin_by_hash(ipfs_hash)
