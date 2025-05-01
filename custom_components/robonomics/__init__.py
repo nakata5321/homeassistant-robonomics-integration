@@ -51,6 +51,7 @@ from .const import (
     PLATFORMS,
     ROBONOMICS,
     SAVE_VIDEO_SERVICE,
+    SAVE_PHOTO_SERVICE,
     TIME_CHANGE_COUNT,
     TIME_CHANGE_UNSUB,
     TWIN_ID,
@@ -81,6 +82,7 @@ from .manage_users import UserManager
 from .robonomics import Robonomics, get_or_create_twin_id
 from .services import (
     save_video,
+    save_photo,
 )
 from .libp2p import LibP2P
 from .telemetry_helpers import Telemetry
@@ -355,6 +357,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await save_video(hass, target, path, duration, controller_account)
 
     hass.services.async_register(DOMAIN, SAVE_VIDEO_SERVICE, handle_save_video)
+
+    async def handle_save_photo(call: ServiceCall) -> None:
+        """Callback for save_video_to_robonomics service"""
+        if "entity_id" in call.data:
+            target = {"entity_id": call.data["entity_id"]}
+        elif "device_id" in call.data:
+            target = {"device_id": call.data["device_id"]}
+        path = call.data["path"]
+        if TWIN_ID not in hass.data[DOMAIN]:
+            _LOGGER.debug("There is no twin id. Looking for one...")
+            await get_or_create_twin_id(hass)
+        await save_photo(hass, target, path, controller_account)
+
+    hass.services.async_register(DOMAIN, SAVE_PHOTO_SERVICE, handle_save_photo)
 
     hass.data[DOMAIN][TIME_CHANGE_UNSUB] = async_track_time_interval(
         hass,
