@@ -112,13 +112,13 @@ async def save_photo(
         if count > 10:
             break
     if os.path.isfile(f"{path}/{filename}"):
-        _LOGGER.debug(f"Start encrypt video {filename}")
-        admin_keypair: Keypair = sub_admin_acc.keypair
-        video_data = await FileSystemUtils(hass).read_file_data(f"{path}/{filename}", "rb")
-        encrypted_data = encrypt_message(
-            video_data, admin_keypair, admin_keypair.public_key
-        )
-        await FileSystemUtils(hass).write_file_data(f"{path}/{filename}", encrypted_data)
+        #_LOGGER.debug(f"Start encrypt video {filename}")
+        #admin_keypair: Keypair = sub_admin_acc.keypair
+        #video_data = await FileSystemUtils(hass).read_file_data(f"{path}/{filename}", "rb")
+        #encrypted_data = encrypt_message(
+        #    video_data, admin_keypair, admin_keypair.public_key
+        #)
+        #await FileSystemUtils(hass).write_file_data(f"{path}/{filename}", encrypted_data)
         await add_media_to_ipfs(hass, f"{path}/{filename}")
         folder_ipfs_hash = await IPFSLocalUtils(hass).get_folder_hash(IPFS_MEDIA_PATH)
         # delete file from system
