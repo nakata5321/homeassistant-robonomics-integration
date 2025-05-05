@@ -383,7 +383,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if TWIN_ID not in hass.data[DOMAIN]:
             _LOGGER.debug("There is no twin id. Looking for one...")
             await get_or_create_twin_id(hass)
-        await save_photo(hass, target, path, controller_account)
+        await save_photo_privacy(hass, target, path, controller_account)
 
     hass.services.async_register(DOMAIN, SAVE_PHOTO_PRIVACY_SERVICE, handle_save_photo_privacy)
 

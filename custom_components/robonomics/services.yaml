@@ -37,8 +37,8 @@ save_photo_to_robonomics:
         text:
 
 save_photo_to_robonomics_privacy:
-  name: Save photo to robonomics
-  description: Make photo, save it to IPFS and Digital Twin
+  name: Save photo to  privacy
+  description: Make photo, save it to IPFS and Digital Twin privacy
   target:
       entity:
         domain: camera
