@@ -9,7 +9,6 @@ CREATE_BACKUP_SERVICE = "save_backup_to_robonomics"
 RESTORE_BACKUP_SERVICE = "restore_from_robonomics_backup"
 SAVE_VIDEO_SERVICE = "save_video_to_robonomics"
 SAVE_PHOTO_SERVICE = "save_photo_to_robonomics"
-SAVE_PHOTO_PRIVACY_SERVICE = "save_photo_to_robonomics_privacy"
 
 CONF_ADMIN_SEED = "admin_seed_secret"
 CONF_SUB_OWNER_ADDRESS = "sub_owner_address"
