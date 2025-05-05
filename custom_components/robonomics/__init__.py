@@ -52,6 +52,7 @@ from .const import (
     ROBONOMICS,
     SAVE_VIDEO_SERVICE,
     SAVE_PHOTO_SERVICE,
+    SAVE_PHOTO_PRIVACY_SERVICE,
     TIME_CHANGE_COUNT,
     TIME_CHANGE_UNSUB,
     TWIN_ID,
@@ -384,7 +385,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             await get_or_create_twin_id(hass)
         await save_photo(hass, target, path, controller_account)
 
-    hass.services.async_register(DOMAIN, SAVE_PHOTO_SERVICE, handle_save_photo_privacy)
+    hass.services.async_register(DOMAIN, SAVE_PHOTO_PRIVACY_SERVICE, handle_save_photo_privacy)
 
     hass.data[DOMAIN][TIME_CHANGE_UNSUB] = async_track_time_interval(
         hass,
