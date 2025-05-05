@@ -7,6 +7,11 @@ import tempfile
 import time
 import typing as tp
 from pathlib import Path
+import cv2
+from PIL import Image
+import numpy as np
+import io
+
 
 from homeassistant.components.camera.const import DOMAIN as CAMERA_DOMAIN
 from homeassistant.components.camera.const import SERVICE_RECORD
@@ -114,11 +119,29 @@ async def save_photo(
     if os.path.isfile(f"{path}/{filename}"):
         #_LOGGER.debug(f"Start encrypt video {filename}")
         #admin_keypair: Keypair = sub_admin_acc.keypair
-        #video_data = await FileSystemUtils(hass).read_file_data(f"{path}/{filename}", "rb")
+        input_photo = await FileSystemUtils(hass).read_file_data(f"{path}/{filename}", "rb")
+        np_arr = np.frombuffer(input_photo, np.uint8)
+        cv_image = cv2.imdecode(np_arr, cv2.IMREAD_UNCHANGED)
+        gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+        image = Image.fromarray(cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB))
+
+        emoji_bin = await FileSystemUtils(hass).read_file_data("/media/rocket.png", "rb")
+        emoji = Image.open(io.BytesIO(emoji_bin)).convert("RGBA")
+
+        # Классификатор лиц OpenCV
+        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+
+        # Накладываем смайлик на каждое лицо
+        for (x, y, w, h) in faces:
+            resized_emoji = emoji.resize((w, h))
+            image.paste(resized_emoji, (x, y), resized_emoji)
+
+
         #encrypted_data = encrypt_message(
         #    video_data, admin_keypair, admin_keypair.public_key
         #)
-        #await FileSystemUtils(hass).write_file_data(f"{path}/{filename}", encrypted_data)
+        await FileSystemUtils(hass).write_file_data(f"{path}/{filename}", image.convert("RGB"))
         await add_media_to_ipfs(hass, f"{path}/{filename}")
         folder_ipfs_hash = await IPFSLocalUtils(hass).get_folder_hash(IPFS_MEDIA_PATH)
         # delete file from system
