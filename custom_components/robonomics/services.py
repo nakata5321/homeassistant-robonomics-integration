@@ -11,6 +11,7 @@ import cv2
 from PIL import Image
 import numpy as np
 import io
+import random
 
 
 from homeassistant.components.camera.const import DOMAIN as CAMERA_DOMAIN
@@ -125,8 +126,7 @@ async def save_photo(
         gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
         image = Image.fromarray(cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB))
 
-        emoji_bin = await FileSystemUtils(hass).read_file_data("/media/rocket.png", "rb")
-        emoji = Image.open(io.BytesIO(emoji_bin)).convert("RGBA")
+
 
         # Классификатор лиц OpenCV
         face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
@@ -134,6 +134,10 @@ async def save_photo(
 
         # Накладываем смайлик на каждое лицо
         for (x, y, w, h) in faces:
+            emoji_num = random.randint(1, 17)
+            emoji_bin = await FileSystemUtils(hass).read_file_data(
+                f"/home/homeassistant/.homeassistant/media/smiles/{emoji_num}.png", "rb")
+            emoji = Image.open(io.BytesIO(emoji_bin)).convert("RGBA")
             resized_emoji = emoji.resize((w, h))
             image.paste(resized_emoji, (x, y), resized_emoji)
 
