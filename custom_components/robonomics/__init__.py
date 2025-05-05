@@ -372,6 +372,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.services.async_register(DOMAIN, SAVE_PHOTO_SERVICE, handle_save_photo)
 
+    async def handle_save_photo_privacy(call: ServiceCall) -> None:
+        """Callback for save_video_to_robonomics service"""
+        if "entity_id" in call.data:
+            target = {"entity_id": call.data["entity_id"]}
+        elif "device_id" in call.data:
+            target = {"device_id": call.data["device_id"]}
+        path = call.data["path"]
+        if TWIN_ID not in hass.data[DOMAIN]:
+            _LOGGER.debug("There is no twin id. Looking for one...")
+            await get_or_create_twin_id(hass)
+        await save_photo(hass, target, path, controller_account)
+
+    hass.services.async_register(DOMAIN, SAVE_PHOTO_SERVICE, handle_save_photo_privacy)
+
     hass.data[DOMAIN][TIME_CHANGE_UNSUB] = async_track_time_interval(
         hass,
         hass.data[DOMAIN][HANDLE_TIME_CHANGE],

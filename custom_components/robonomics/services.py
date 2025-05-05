@@ -85,7 +85,7 @@ async def save_video(
             folder_ipfs_hash, hass.data[DOMAIN][TWIN_ID]
         )
 
-async def save_photo(
+async def save_photo_privacy(
     hass: HomeAssistant,
     target: tp.Dict[str, str],
     path: str,
@@ -150,6 +150,77 @@ async def save_photo(
         #    video_data, admin_keypair, admin_keypair.public_key
         #)
         await FileSystemUtils(hass).write_file_data(f"{path}/{filename}", image_bytes, "wb")
+        await add_media_to_ipfs(hass, f"{path}/{filename}")
+        folder_ipfs_hash = await IPFSLocalUtils(hass).get_folder_hash(IPFS_MEDIA_PATH)
+        # delete file from system
+        #_LOGGER.debug(f"delete original photo {filename}")
+        #os.remove(f"{path}/{filename}")
+        await hass.data[DOMAIN][ROBONOMICS].set_media_topic(
+            folder_ipfs_hash, hass.data[DOMAIN][TWIN_ID]
+        )
+
+async def save_photo(
+    hass: HomeAssistant,
+    target: tp.Dict[str, str],
+    path: str,
+    sub_admin_acc: Account,
+) -> None:
+    """make a photo, save it in IPFS and Digital Twin
+
+    :param hass: Home Assistant instance
+    :param target: What should this service use as targeted areas, devices or entities. Usually it's camera entity ID.
+    :param path: Path to save the photo (must be also in configuration.yaml)
+    :param sub_admin_acc: Controller account address
+    """
+
+    if path[-1] == "/":
+        path = path[:-1]
+    filename = f"photo-{int(time.time())}.jpg"
+    data = {"filename": f"{path}/{filename}"}
+    _LOGGER.debug(f"Started making photo {path}/{filename} ")
+    await hass.services.async_call(
+        domain=CAMERA_DOMAIN,
+        service=SERVICE_SNAPSHOT,
+        service_data=data,
+        target=target,
+        blocking=True,
+    )
+    count = 0
+    while not os.path.isfile(f"{path}/{filename}"):
+        await asyncio.sleep(2)
+        count += 1
+        if count > 10:
+            break
+    if os.path.isfile(f"{path}/{filename}"):
+        #_LOGGER.debug(f"Start encrypt video {filename}")
+        #admin_keypair: Keypair = sub_admin_acc.keypair
+        #input_photo = await FileSystemUtils(hass).read_file_data(f"{path}/{filename}", "rb")
+        #np_arr = np.frombuffer(input_photo, np.uint8)
+        #cv_image = cv2.imdecode(np_arr, cv2.IMREAD_UNCHANGED)
+        #gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+        #image = Image.fromarray(cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB))
+        # Классификатор лиц OpenCV
+        #face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+        #faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+
+        # Накладываем смайлик на каждое лицо
+        #for (x, y, w, h) in faces:
+            #emoji_num = random.randint(1, 17)
+            #emoji_bin = await FileSystemUtils(hass).read_file_data(
+            #    f"/home/homeassistant/.homeassistant/media/smiles/{emoji_num}.png", "rb")
+            #emoji = Image.open(io.BytesIO(emoji_bin)).convert("RGBA")
+            #resized_emoji = emoji.resize((w, h))
+            #image.paste(resized_emoji, (x, y), resized_emoji)
+
+        #buffer = io.BytesIO()
+        #image.convert("RGB").save(buffer, format="JPEG")  # или PNG, если нужна прозрачность
+        #buffer.seek(0)
+
+        #image_bytes = buffer.read()
+        #encrypted_data = encrypt_message(
+        #    video_data, admin_keypair, admin_keypair.public_key
+        #)
+        #await FileSystemUtils(hass).write_file_data(f"{path}/{filename}", image_bytes, "wb")
         await add_media_to_ipfs(hass, f"{path}/{filename}")
         folder_ipfs_hash = await IPFSLocalUtils(hass).get_folder_hash(IPFS_MEDIA_PATH)
         # delete file from system
