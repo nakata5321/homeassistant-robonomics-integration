@@ -137,11 +137,15 @@ async def save_photo(
             resized_emoji = emoji.resize((w, h))
             image.paste(resized_emoji, (x, y), resized_emoji)
 
+        buffer = io.BytesIO()
+        image.convert("RGB").save(buffer, format="JPEG")  # или PNG, если нужна прозрачность
+        buffer.seek(0)
 
+        image_bytes = buffer.read()
         #encrypted_data = encrypt_message(
         #    video_data, admin_keypair, admin_keypair.public_key
         #)
-        await FileSystemUtils(hass).write_file_data(f"{path}/{filename}", image.convert("RGB"))
+        await FileSystemUtils(hass).write_file_data(f"{path}/{filename}", image_bytes, "wb")
         await add_media_to_ipfs(hass, f"{path}/{filename}")
         folder_ipfs_hash = await IPFSLocalUtils(hass).get_folder_hash(IPFS_MEDIA_PATH)
         # delete file from system
